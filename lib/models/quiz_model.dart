@@ -1,17 +1,13 @@
 class Quiz {
-  final int? quizId;
-  final String title;
-  final String subject;
-  final String type;
-  final int timer;
+  int? quizId;
+  String? title;
+  String? subject;
+  String? type;
+  int? timer;
 
-  Quiz(
-      {this.quizId,
-      required this.title,
-      required this.subject,
-      required this.type,
-      required this.timer});
+  Quiz({this.quizId, this.title, this.subject, this.type, this.timer});
 
+  // Convert Quiz object to a map
   Map<String, dynamic> toMap() {
     return {
       'quiz_id': quizId,
@@ -22,6 +18,7 @@ class Quiz {
     };
   }
 
+  // Convert a map to a Quiz object
   factory Quiz.fromMap(Map<String, dynamic> map) {
     return Quiz(
       quizId: map['quiz_id'],
@@ -32,3 +29,4 @@ class Quiz {
     );
   }
 }
+

@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import '../models/questionEsai_model.dart';
 import '../models/quiz_model.dart';
 import '../models/question_model.dart';
 import '../models/result_model.dart';
@@ -23,6 +24,7 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    // Create Quiz table
     await db.execute('''
     CREATE TABLE Quiz (
       quiz_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,8 +33,9 @@ class DatabaseHelper {
       type TEXT,
       timer INTEGER
     )
-  ''');
+    ''');
 
+    // Create Question table (multiple choice)
     await db.execute('''
     CREATE TABLE Question (
       question_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,8 +48,9 @@ class DatabaseHelper {
       answer TEXT,
       FOREIGN KEY (quiz_id) REFERENCES Quiz (quiz_id) ON DELETE CASCADE
     )
-  ''');
+    ''');
 
+    // Create Result table
     await db.execute('''
     CREATE TABLE Result (
       result_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,18 +59,41 @@ class DatabaseHelper {
       score REAL,
       FOREIGN KEY (quiz_id) REFERENCES Quiz (quiz_id) ON DELETE CASCADE
     )
-  ''');
+    ''');
 
+    // Create Mahasiswa (Student) table
     await db.execute('''
     CREATE TABLE Mahasiswa (
       user_id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT,
       email TEXT
     )
-  ''');
+    ''');
+
+    // Create QuestionEsai (Essay Question) table
+    await db.execute('''
+    CREATE TABLE QuestionEsai (
+      question_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      quiz_id INTEGER,
+      content TEXT,
+      answer TEXT,
+      FOREIGN KEY (quiz_id) REFERENCES Quiz (quiz_id) ON DELETE CASCADE
+    )
+    ''');
+
+    // Create QuestionBenarSalah (True/False Question) table
+    await db.execute('''
+    CREATE TABLE QuestionBenarSalah (
+      question_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      quiz_id INTEGER,
+      content TEXT,
+      answer TEXT,
+      FOREIGN KEY (quiz_id) REFERENCES Quiz (quiz_id) ON DELETE CASCADE
+    )
+    ''');
   }
 
-  // CRUD untuk tabel Quiz
+  // CRUD for Quiz table
   Future<int> insertQuiz(Quiz quiz) async {
     final db = await database;
     return await db.insert('Quiz', quiz.toMap());
@@ -102,7 +129,7 @@ class DatabaseHelper {
     await db.delete('Quiz'); // Delete all quizzes
   }
 
-  // CRUD untuk tabel Question
+  // CRUD for Question (multiple choice)
   Future<int> insertQuestion(Question question) async {
     final db = await database;
     return await db.insert('Question', question.toMap());
@@ -137,74 +164,83 @@ class DatabaseHelper {
     );
   }
 
-  Future<Map<String, dynamic>> getQuizWithQuestions(int quizId) async {
+  // CRUD for QuestionBenarSalah (True/False)
+  Future<int> insertQuestionBenarSalah(Map<String, dynamic> question) async {
     final db = await database;
-
-    // Ambil data kuis
-    final quizData = await db.query(
-      'Quiz',
-      where: 'quiz_id = ?',
-      whereArgs: [quizId],
-    );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    if (quizData.isEmpty) {
-      return {}; // Jika tidak ada data kuis, kembalikan map kosong
-    }
-
-    // Ambil data pertanyaan yang terkait dengan kuis ini
-    final questionsData = await db.query(
-      'Question',
-      where: 'quiz_id = ?',
-      whereArgs: [quizId],
-    );
-
-    // Kembalikan kuis beserta daftar soal
-    return {
-      'quiz': quizData.first,
-      'questions': questionsData,
-    };
+    return await db.insert('QuestionBenarSalah', question);
   }
 
-  // CRUD untuk tabel Result
+  Future<List<Map<String, dynamic>>> getQuestionsBenarSalahByQuizId(int quizId) async {
+    final db = await database;
+    return await db.query(
+      'QuestionBenarSalah',
+      where: 'quiz_id = ?',
+      whereArgs: [quizId],
+    );
+  }
+
+  Future<int> updateQuestionBenarSalah(Map<String, dynamic> question, int questionId) async {
+    final db = await database;
+    return await db.update(
+      'QuestionBenarSalah',
+      question,
+      where: 'question_id = ?',
+      whereArgs: [questionId],
+    );
+  }
+
+  Future<int> deleteQuestionBenarSalah(int questionId) async {
+    final db = await database;
+    return await db.delete(
+      'QuestionBenarSalah',
+      where: 'question_id = ?',
+      whereArgs: [questionId],
+    );
+  }
+
+  // CRUD for QuestionEsai (Essay)
+  Future<void> insertQuestionEsai(QuestionEsai questionEsai) async {
+    final db = await database;
+    try {
+      await db.insert(
+        'QuestionEsai',
+        questionEsai.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (e) {
+      print("Error inserting QuestionEsai: $e");
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getQuestionsEsaiByQuizId(int quizId) async {
+    final db = await database;
+    return await db.query(
+      'QuestionEsai',
+      where: 'quiz_id = ?',
+      whereArgs: [quizId],
+    );
+  }
+
+  Future<int> updateQuestionEsai(Map<String, dynamic> questionEsai, int questionId) async {
+    final db = await database;
+    return await db.update(
+      'QuestionEsai',
+      questionEsai,
+      where: 'question_id = ?',
+      whereArgs: [questionId],
+    );
+  }
+
+  Future<int> deleteQuestionEsai(int questionId) async {
+    final db = await database;
+    return await db.delete(
+      'QuestionEsai',
+      where: 'question_id = ?',
+      whereArgs: [questionId],
+    );
+  }
+
+  // CRUD for Result table
   Future<int> insertResult(Result result) async {
     final db = await database;
     return await db.insert('Result', result.toMap());
@@ -250,15 +286,26 @@ class DatabaseHelper {
     );
   }
 
-//   Future<List<Map<String, dynamic>>> getLeaderboard(int quizId) async {
-//   final db = await database;
-//   return await db.rawQuery('''
-//     SELECT Mahasiswa.name, Result.score
-//     FROM Result
-//     JOIN Mahasiswa ON Result.user_id = Mahasiswa.user_id
-//     WHERE Result.quiz_id = ?
-//     ORDER BY Result.score DESC
-//     LIMIT 10
-//   ''', [quizId]);
-// }
-}
+  Future<Map<String, dynamic>> getQuizWithQuestions(int quizId) async {
+    final db = await database;
+
+    // Join Quiz and Question tables
+    final quizData = await db.rawQuery('''
+    SELECT * FROM Quiz WHERE quiz_id = ?
+  ''', [quizId]);
+
+    if (quizData.isEmpty) {
+      return {}; // If no quiz data, return an empty map
+    }
+
+    // Get the associated questions
+    final questionsData = await db.rawQuery('''
+    SELECT * FROM Question WHERE quiz_id = ?
+  ''', [quizId]);
+
+    // Return the quiz and questions as a map
+    return {
+      'quiz': quizData.first,
+      'questions': questionsData,
+    };
+  }}
