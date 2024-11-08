@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quizdb/database/database_helper.dart';
-//comint
+
 class QuizScreen extends StatefulWidget {
   final int quizId;
 
