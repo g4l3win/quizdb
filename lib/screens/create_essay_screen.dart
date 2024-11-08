@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:quizdb/database/database_helper.dart';
 import 'package:quizdb/models/questionEsai_model.dart'; // This should be used for the QuestionEsai class
-import 'package:quizdb/models/quiz_model.dart'; // This should be used for Quiz data if needed
+import 'package:quizdb/models/quiz_model.dart';
+import 'package:quizdb/screens/truefalse_final_screen.dart'; // This should be used for Quiz data if needed
 
 class CreateEssayScreen extends StatefulWidget {
   @override
@@ -24,9 +25,10 @@ class _CreateEssayScreenState extends State<CreateEssayScreen> {
   Future<void> _fetchQuizzes() async {
     final dbHelper = DatabaseHelper();
     final allQuizzes = await dbHelper.getAllQuizzes(); // Fetch all quizzes
+    final essayQuizzes = allQuizzes.where((quiz) => quiz.type == "Esai").toList();
 
     setState(() {
-      quizzes = allQuizzes.map((quiz) {
+      quizzes = essayQuizzes.map((quiz) {
         return {
           'quiz_id': quiz.quizId,
           'title': quiz.title,
@@ -152,6 +154,10 @@ class _CreateEssayScreenState extends State<CreateEssayScreen> {
                     if (validateInput()) {
                       await _insertEssayQuestion(); // Insert the essay question into the database
                       Navigator.pop(context); // Go back to the previous screen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => TruefalseFinalScreen()),
+                      );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:quizdb/database/database_helper.dart';
 import 'package:quizdb/models/quiz_model.dart';
+import 'package:quizdb/screens/create_trueFalse_screen.dart';
 import 'create_multiplechoice_screen.dart';
 import 'create_essay_screen.dart';
-import 'create_truefalse_screen.dart';
+
 
 class CreateQuizScreen extends StatefulWidget {
   @override
@@ -125,7 +126,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                 items: timers.map((timer) {
                   return DropdownMenuItem(
                     value: timer,
-                    child: Text('$timer menit'),
+                    child: Text('$timer detik'),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -176,10 +177,10 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
               // Button to navigate to Create True/False Quiz screen
               ElevatedButton(
                 onPressed: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => CreateTrueFalseScreen()),
-                  // );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CreateTrueFalseScreen()),
+                  );
                 },
                 child: Text("Buat Kuis Benar/Salah"),
                 style: ElevatedButton.styleFrom(
