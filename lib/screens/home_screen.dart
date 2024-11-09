@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:quizdb/database/database_helper.dart';
+import 'package:quizdb/models/quiz_model.dart';
 import 'quiz_screen.dart';
-//import 'materistat.dart';
-//import 'leaderboard.dart';
 import 'create_quiz_screen.dart'; // Import halaman baru
+import 'Account.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -11,31 +11,54 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Map<String, dynamic>> quizList = [];
+  List<String> catNames = [
+    "Buat Kuis",
+    "Statistik",
+    "Papan Peringkat",
+  ];
 
-  @override
-  void initState() {
-    super.initState();
-    _loadQuizzes();
-  }
+  List<Color> catColors = [
+    Color(0xFF00B1C2),
+    Color(0xFF00B1C2),
+    Color(0xFF00B1C2),
+  ];
 
-  Future<void> _loadQuizzes() async {
-    final dbHelper = DatabaseHelper();
-    final quizzes = await dbHelper.getAllQuizzes();
+  List<Icon> catIcons = [
+    Icon(Icons.category, color: Colors.white, size: 30),
+    Icon(Icons.video_library, color: Colors.white, size: 30),
+    Icon(Icons.assignment, color: Colors.white, size: 30),
+  ];
+
+  List<String> imgList = [
+    'Flutter',
+    'SQL',
+    'HTML',
+    'C++',
+  ];
+
+  int _selectedIndex = 0; // Menyimpan indeks halaman yang dipilih
+
+  List<Widget> _pages = [
+    HomePage(), // Halaman utama
+    Account(), // Halaman akun
+  ];
+
+  void _onItemTapped(int index) {
     setState(() {
-      quizList = quizzes.map((quiz) => quiz.toMap()).toList();
+      _selectedIndex = index; // Mengubah halaman yang dipilih
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
+      body: _selectedIndex == 0
+          ? SingleChildScrollView(
         child: Column(
           children: [
-            // Header dan Search
             Container(
-              padding: EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+              padding: EdgeInsets.only(
+                  top: 15, left: 15, right: 15, bottom: 10),
               decoration: BoxDecoration(
                 color: Color(0xFF00B1C2),
                 borderRadius: BorderRadius.only(
@@ -49,24 +72,31 @@ class _HomePageState extends State<HomePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(Icons.dashboard, color: Color(0xFFFFD801), size: 30),
+                      Icon(Icons.dashboard,
+                          size: 30, color: Color(0xFFFFD801)),
                       Icon(Icons.notifications,
-                          color: Color(0xFFFFD801), size: 30),
+                          size: 30, color: Color(0xFFFFD801)),
                     ],
                   ),
                   SizedBox(height: 20),
-                  Text(
-                    "Hi, Lecturer",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
-                      fontWeight: FontWeight.w600,
+                  Padding(
+                    padding: EdgeInsets.only(left: 3, bottom: 15),
+                    child: Text(
+                      "Hi, Lecturer",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
+                        wordSpacing: 2,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 20),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 15),
+                    margin: EdgeInsets.only(top: 5, bottom: 20),
+                    width: MediaQuery.of(context).size.width,
                     height: 55,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: Color(0xFF3B547A),
                       borderRadius: BorderRadius.circular(10),
@@ -75,146 +105,205 @@ class _HomePageState extends State<HomePage> {
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: "Search here...",
-                        hintStyle: TextStyle(color: Colors.white),
-                        prefixIcon:
-                            Icon(Icons.search, color: Color(0xFFFFD801)),
+                        hintStyle: TextStyle(
+                          color: Colors.white,
+                        ),
+                        prefixIcon: Icon(Icons.search,
+                            size: 25, color: Color(0xFFFFD801)),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-
-            // Tombol Buat Kuis, Statistik, dan Leaderboard
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  // Button Buat Kuis
-                  Column(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.add_circle,
-                            color: Color(0xFF00B1C2), size: 40),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CreateQuizScreen()),
-                          );
-                        },
-                      ),
-                      Text("Buat Kuis", style: TextStyle(color: Colors.black)),
-                    ],
-                  ),
-
-                  // Button Statistik
-                  Column(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.bar_chart,
-                            color: Color(0xFF00B1C2), size: 40),
-                        onPressed: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(builder: (context) => MateriStat()),
-                          // );
-                        },
-                      ),
-                      Text("Statistik", style: TextStyle(color: Colors.black)),
-                    ],
-                  ),
-
-                  // Button Papan Peringkat
-                  Column(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.leaderboard,
-                            color: Color(0xFF00B1C2), size: 40),
-                        onPressed: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(builder: (context) => LeaderboardScreen()),
-                          // );
-                        },
-                      ),
-                      Text("Papan Peringkat",
-                          style: TextStyle(color: Colors.black)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Grid View Kategori
-            Padding(
-              padding: EdgeInsets.all(15),
+              padding: EdgeInsets.only(left: 15, right: 15, bottom: 15),
               child: Column(
                 children: [
                   GridView.builder(
+                    itemCount: catNames.length,
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                    SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
                       childAspectRatio: 1.1,
                     ),
-                    itemCount: quizList.length,
                     itemBuilder: (context, index) {
-                      final quiz = quizList[index];
                       return InkWell(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  QuizScreen(quizId: quiz['quiz_id']),
-                            ),
-                          );
+                          if (catNames[index] == "Buat Kuis") {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => CreateQuizScreen()),
+                            );
+                          } else if (catNames[index] == "Statistik") {
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) =>
+                            //         Materistat(), // Isi dengan subjek sesuai kebutuhan
+                            //   ),
+                            // );
+                          } else if (catNames[index] ==
+                              "Papan Peringkat") {
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) =>
+                            //         LeaderboardScreen(), // Isi dengan subjek sesuai kebutuhan
+                            //   ),
+                            // );
+                          }
                         },
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Icon(Icons.quiz,
-                                color: Color(0xFF00B1C2), size: 50),
+                            Container(
+                              height: 60,
+                              width: 60,
+                              decoration: BoxDecoration(
+                                color: catColors[index],
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(child: catIcons[index]),
+                            ),
                             SizedBox(height: 10),
                             Text(
-                              quiz['title'],
+                              catNames[index],
                               style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black.withOpacity(0.7)),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black.withOpacity(0.7),
+                              ),
                             ),
                           ],
                         ),
                       );
                     },
                   ),
-
-                  // Button Hapus Semua Kuis
-                  Column(
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.delete_forever,
-                            color: Color(0xFF00B1C2), size: 40),
-                        onPressed: () async {
-                          final dbHelper = DatabaseHelper();
-                          await dbHelper.deleteAllQuizzes();
-                          _loadQuizzes(); // Refresh quiz list setelah menghapus semua kuis
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text('Semua kuis berhasil dihapus!')),
-                          );
-                        },
+                      Text(
+                        "Kuis yang tersedia",
+                        style: TextStyle(
+                          fontSize: 23,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      Text("Hapus Semua",
-                          style: TextStyle(color: Colors.black)),
                     ],
+                  ),
+                  SizedBox(height: 10),
+                  GridView.builder(
+                    itemCount: imgList.length,
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                    SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio:
+                      (MediaQuery.of(context).size.height - 50 - 25) /
+                          (4 * 240),
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                    ),
+                    itemBuilder: (context, index) {
+                      return InkWell(
+                        onTap: () {
+                          // Navigasi berdasarkan nama gambar
+                          if (imgList[index] == "Flutter") {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => QuizHomePage(
+                                    subject:
+                                    'Mobile Programming'), // Ganti dengan halaman kuis Flutter
+                              ),
+                            );
+                          } else if (imgList[index] == "C++") {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    QuizHomePage(subject: 'Algorithm'),
+                              ),
+                            );
+                          } else if (imgList[index] == "HTML") {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    QuizHomePage(subject: 'Web Programming'),
+                              ),
+                            );
+                          } else if (imgList[index] == "SQL") {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    QuizHomePage(subject: 'Database Systems'),
+                              ),
+                            );
+                          }
+                          ;
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Color(0xFFF5F3FF),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.all(10),
+                                child: Image.asset(
+                                  "images/${imgList[index]}.png",
+                                  width: 100,
+                                  height: 100,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                imgList[index],
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
             ),
           ],
         ),
+      )
+          : _pages[_selectedIndex], // Halaman lain jika bukan Home
+
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex, // Mengatur indeks saat ini
+        onTap: _onItemTapped, // Menangani penekanan ikon
+        showUnselectedLabels: true,
+        iconSize: 32,
+        selectedItemColor: Color(0xFF3B547A),
+        selectedFontSize: 18,
+        unselectedItemColor: Colors.grey,
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings), label: 'Pengaturan'),
+        ],
       ),
     );
   }

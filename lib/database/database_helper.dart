@@ -105,6 +105,17 @@ class DatabaseHelper {
     return List.generate(maps.length, (i) => Quiz.fromMap(maps[i]));
   }
 
+  Future<Map<String, Object?>?> getQuizById(int quizId) async {
+    final db = await database;
+    final result = await db.query(
+      'Quiz',
+      where: 'quiz_id = ?',
+      whereArgs: [quizId],
+      limit: 1, // Membatasi hasil hanya satu data
+    );
+    return result.isNotEmpty ? result.first : null;
+  }
+
   Future<int> updateQuiz(Quiz quiz) async {
     final db = await database;
     return await db.update(

@@ -1,118 +1,134 @@
 import 'package:flutter/material.dart';
 import 'package:quizdb/database/database_helper.dart';
+import 'package:quizdb/models/quiz_model.dart';
+import 'package:quizdb/models/question_model.dart';
+import 'package:quizdb/models/questionBenarSalah_model.dart';
+import 'package:quizdb/models/questionEsai_model.dart';
+import 'package:quizdb/screens/home_screen.dart';
+import 'pilihanganda.dart';
+import 'benarsalah.dart';
+import 'isian.dart';
 
-class QuizScreen extends StatefulWidget {
-  final int quizId;
+class QuizHomePage extends StatefulWidget {
+  final String subject; // Receives subject from the previous page
 
-  QuizScreen({required this.quizId});
+  QuizHomePage({required this.subject});
 
   @override
-  _QuizScreenState createState() => _QuizScreenState();
+  _QuizHomePageState createState() => _QuizHomePageState();
 }
 
-class _QuizScreenState extends State<QuizScreen> {
-  Map<String, dynamic> quizData = {};
-  List<Map<String, dynamic>> questions = [];
+class _QuizHomePageState extends State<QuizHomePage> {
+  List<Map<String, dynamic>> quizList = [];
 
   @override
   void initState() {
     super.initState();
-    _loadQuizData();
+    _fetchQuizzesBySubject();
   }
 
-  Future<void> _loadQuizData() async {
+  // Fetch quizzes based on the selected subject
+  Future<void> _fetchQuizzesBySubject() async {
     final dbHelper = DatabaseHelper();
-    final data = await dbHelper.getQuizWithQuestions(widget.quizId);
+    final quizzes = await dbHelper.getAllQuizzes();
+    final subjectQuizzes = quizzes.where((quiz) => quiz.subject == widget.subject).toList();
+
     setState(() {
-      quizData = data['quiz'] ?? {};
-      questions = data['questions'] ?? [];
+      quizList = subjectQuizzes.map((quiz) {
+        return {
+          'quiz_id': quiz.quizId,
+          'title': quiz.title,
+          'type': quiz.type,
+        };
+      }).toList();
     });
-  }
-
-  Future<void> _deleteAllQuestions() async {
-    final dbHelper = DatabaseHelper();
-    await dbHelper
-        .deleteQuestion; // Call to delete all questions for the specific quiz
-    await _loadQuizData(); // Reload quiz data to reflect the deletion
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Semua soal berhasil dihapus!')),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Kuis ID: ${widget.quizId}')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: quizData.isEmpty
-            ? Center(child: CircularProgressIndicator())
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'ID Kuis: ${widget.quizId}',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    'Judul: ${quizData['title'] ?? ''}',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  Text('Mata Pelajaran: ${quizData['subject'] ?? ''}'),
-                  Text('Jenis: ${quizData['type'] ?? ''}'),
-                  Text('Waktu: ${quizData['timer'] ?? ''} detik'),
-                  SizedBox(height: 20),
-                  Divider(),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () async {
-                      await _deleteAllQuestions();
-                    },
-                    child: Text('Hapus Semua Soal'),
-                  ),
-                  Text(
-                    'Soal-Soal:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: questions.length,
-                      itemBuilder: (context, index) {
-                        final question = questions[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'ID Soal: ${question['question_id']}',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                'Soal ${index + 1}: ${question['content']}',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              SizedBox(height: 5),
-                              Text('A. ${question['option_a']}'),
-                              Text('B. ${question['option_b']}'),
-                              Text('C. ${question['option_c']}'),
-                              Text('D. ${question['option_d']}'),
-                              SizedBox(height: 5),
-                              Text(
-                                'Jawaban Benar: ${question['answer']}',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        );
+      backgroundColor: Color(0xFF00B1C2),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 50),
+              Text(
+                "Quizzes for ${widget.subject}",
+                style: TextStyle(
+                  fontSize: 24,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20),
+              // List of buttons for each quiz title
+              ...quizList.map((quiz) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Navigate based on quiz type
+                        if (quiz['type'] == 'Pilihan Ganda') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Pilihanganda(quizId: quiz['quiz_id'])
+                            ),
+                          );
+                        } else if (quiz['type'] == 'Benar Salah') {
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => BenarSalahPage(
+                          //       quizId: quiz['quiz_id'],
+                          //     ),
+                          //   ),
+                          // );
+                        } else if (quiz['type'] == 'Esai') {
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => EsaiPage(
+                          //       quizId: quiz['quiz_id'],
+                          //     ),
+                          //   ),
+                          // );
+                        }
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF3B547A),
+                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: Text(
+                        quiz['title'],
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Color(0xFFFFD801),
+                        ),
+                      ),
                     ),
                   ),
-                ],
-              ),
+                );
+              }).toList(),
+            ],
+          ),
+        ),
+      ),
+      appBar: AppBar(
+        title: Text(
+          "${widget.subject} Quizzes",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Color(0xFF3B547A),
       ),
     );
   }
