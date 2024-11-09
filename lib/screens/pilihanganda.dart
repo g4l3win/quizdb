@@ -98,6 +98,7 @@ class _PilihangandaState extends State<Pilihanganda> {
         builder: (context) => ResultsPage(
           currentScore: (score / questionSet.length) * 100,
           subject: subject ?? "Quiz",
+          quizId: widget.quizId,
         ),
       ),
     );

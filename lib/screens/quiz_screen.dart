@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quizdb/database/database_helper.dart';
-import 'package:quizdb/models/quiz_model.dart';
-import 'package:quizdb/models/question_model.dart';
-import 'package:quizdb/models/questionBenarSalah_model.dart';
-import 'package:quizdb/models/questionEsai_model.dart';
-import 'package:quizdb/screens/home_screen.dart';
+
 import 'pilihanganda.dart';
 import 'benarsalah.dart';
 import 'isian.dart';
