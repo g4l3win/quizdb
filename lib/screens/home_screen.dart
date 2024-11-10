@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:quizdb/database/database_helper.dart';
-import 'package:quizdb/models/quiz_model.dart';
 import 'quiz_screen.dart';
 import 'create_quiz_screen.dart'; // Import halaman baru
 import 'Account.dart';
+import 'materistat.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -139,13 +138,13 @@ class _HomePageState extends State<HomePage> {
                                   builder: (context) => CreateQuizScreen()),
                             );
                           } else if (catNames[index] == "Statistik") {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) =>
-                            //         Materistat(), // Isi dengan subjek sesuai kebutuhan
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    Materistat(), // Isi dengan subjek sesuai kebutuhan
+                              ),
+                            );
                           } else if (catNames[index] ==
                               "Papan Peringkat") {
                             // Navigator.push(

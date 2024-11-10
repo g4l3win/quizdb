@@ -7,7 +7,9 @@ import '../models/result_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
+
   factory DatabaseHelper() => _instance;
+
   DatabaseHelper._internal();
 
   Database? _database;
@@ -89,6 +91,29 @@ class DatabaseHelper {
     )
     ''');
 
+    // Insert sample data into Result table
+    await db.execute('''
+      INSERT INTO Result (quiz_id, user_id, score) VALUES
+      (1, 82501, 100),
+      (1, 82502, 66),
+      (1, 82503, 33),
+      (2, 82506, 100),
+      (2, 82507, 100),
+      (2, 82508, 66),
+      (3, 82501, 0),
+      (3, 82503, 66),
+      (3, 82505, 0),
+      (4, 82502, 33),
+      (4, 82504, 66),
+      (4, 82506, 100),
+      (5, 82501, 66),
+      (5, 82502, 66),
+      (5, 82505, 33),
+      (6, 82502, 100),
+      (6, 82506, 66),
+      (6, 82507, 100)
+    ''');
+
     // Create Mahasiswa (Student) table
     await db.execute('''
     CREATE TABLE Mahasiswa (
@@ -97,16 +122,26 @@ class DatabaseHelper {
     )
     ''');
 
-    await db.execute("INSERT INTO Mahasiswa (user_id, name) VALUES (82501, 'Rudi');");
-    await db.execute("INSERT INTO Mahasiswa (user_id, name) VALUES (82502, 'Siti');");
-    await db.execute("INSERT INTO Mahasiswa (user_id, name) VALUES (82503, 'Andi');");
-    await db.execute("INSERT INTO Mahasiswa (user_id, name) VALUES (82504, 'Dewi');");
-    await db.execute("INSERT INTO Mahasiswa (user_id, name) VALUES (82505, 'Budi');");
-    await db.execute("INSERT INTO Mahasiswa (user_id, name) VALUES (82506, 'Fitri');");
-    await db.execute("INSERT INTO Mahasiswa (user_id, name) VALUES (82507, 'Joko');");
-    await db.execute("INSERT INTO Mahasiswa (user_id, name) VALUES (82508, 'Nina');");
-    await db.execute("INSERT INTO Mahasiswa (user_id, name) VALUES (82509, 'Tono');");
-    await db.execute("INSERT INTO Mahasiswa (user_id, name) VALUES (82510, 'Lina');");
+    await db.execute(
+        "INSERT INTO Mahasiswa (user_id, name) VALUES (82501, 'Rudi');");
+    await db.execute(
+        "INSERT INTO Mahasiswa (user_id, name) VALUES (82502, 'Siti');");
+    await db.execute(
+        "INSERT INTO Mahasiswa (user_id, name) VALUES (82503, 'Andi');");
+    await db.execute(
+        "INSERT INTO Mahasiswa (user_id, name) VALUES (82504, 'Dewi');");
+    await db.execute(
+        "INSERT INTO Mahasiswa (user_id, name) VALUES (82505, 'Budi');");
+    await db.execute(
+        "INSERT INTO Mahasiswa (user_id, name) VALUES (82506, 'Fitri');");
+    await db.execute(
+        "INSERT INTO Mahasiswa (user_id, name) VALUES (82507, 'Joko');");
+    await db.execute(
+        "INSERT INTO Mahasiswa (user_id, name) VALUES (82508, 'Nina');");
+    await db.execute(
+        "INSERT INTO Mahasiswa (user_id, name) VALUES (82509, 'Tono');");
+    await db.execute(
+        "INSERT INTO Mahasiswa (user_id, name) VALUES (82510, 'Lina');");
 
     // Create QuestionEsai (Essay Question) table
     await db.execute('''
@@ -174,6 +209,7 @@ class DatabaseHelper {
     );
     return result.isNotEmpty ? result.first : null;
   }
+  
 
   Future<int> updateQuiz(Quiz quiz) async {
     final db = await database;
@@ -240,7 +276,8 @@ class DatabaseHelper {
     return await db.insert('QuestionBenarSalah', question);
   }
 
-  Future<List<Map<String, dynamic>>> getQuestionsBenarSalahByQuizId(int quizId) async {
+  Future<List<Map<String, dynamic>>> getQuestionsBenarSalahByQuizId(
+      int quizId) async {
     final db = await database;
     return await db.query(
       'QuestionBenarSalah',
@@ -249,7 +286,8 @@ class DatabaseHelper {
     );
   }
 
-  Future<int> updateQuestionBenarSalah(Map<String, dynamic> question, int questionId) async {
+  Future<int> updateQuestionBenarSalah(Map<String, dynamic> question,
+      int questionId) async {
     final db = await database;
     return await db.update(
       'QuestionBenarSalah',
@@ -282,7 +320,8 @@ class DatabaseHelper {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getQuestionsEsaiByQuizId(int quizId) async {
+  Future<List<Map<String, dynamic>>> getQuestionsEsaiByQuizId(
+      int quizId) async {
     final db = await database;
     return await db.query(
       'QuestionEsai',
@@ -291,7 +330,8 @@ class DatabaseHelper {
     );
   }
 
-  Future<int> updateQuestionEsai(Map<String, dynamic> questionEsai, int questionId) async {
+  Future<int> updateQuestionEsai(Map<String, dynamic> questionEsai,
+      int questionId) async {
     final db = await database;
     return await db.update(
       'QuestionEsai',
@@ -383,9 +423,41 @@ class DatabaseHelper {
   //dapat data mahasiswa
   Future<List<Map<String, dynamic>>> getUsers() async {
     final db = await database;
-    return await db.query('Mahasiswa'); // Ganti 'User' dengan nama tabel user Anda
+    return await db.query('Mahasiswa');
+  }
+
+  Future<List<String>> getQuizByTypeAndSubject(String type,
+      String subject) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT * FROM Quiz WHERE type = ? AND subject = ?
+    ''', [type, subject]);
+
+    return List<String>.from(maps.map((map) => map['title']));
+  }
+
+  Future<List<int>> getScoresByQuizTypeAndSubject(String type,
+      String subject) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT Result.score FROM Result
+      JOIN Quiz ON Quiz.quiz_id = Result.quiz_id
+      WHERE Quiz.type = ? AND Quiz.subject = ?
+    ''', [type, subject]);
+
+    return List<int>.from(maps.map((map) => map['score'] as int));
+  }
+
+  Future<int> getTotalStudentsByTypeAndSubject(String type,
+      String subject) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.rawQuery('''
+      SELECT COUNT(DISTINCT user_id) as total_students FROM Result
+      JOIN Quiz ON Quiz.quiz_id = Result.quiz_id
+      WHERE Quiz.subject = ? AND Quiz.type = ?
+    ''', [type, subject]);
+
+    return maps.first['total_students'] as int;
   }
 
 }
-
-
