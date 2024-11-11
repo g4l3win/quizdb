@@ -11,84 +11,116 @@ class Statistik extends StatefulWidget {
 }
 
 class _Statistik extends State<Statistik> {
-  List<String> quizNames = [];
-  List<int> currentDistribusi = []; // ubah ke List<int>
+  List<int> currentDistribusi = [];
+  List<Map<String, dynamic>> quizList = [];
   int totalStudents = 0;
-  List<String> quizTypes = ['Pilihan Ganda', 'Esai', 'Benar/Salah'];
+
+  List<String> quizTypes = ['Pilihan Ganda', 'Isian', 'Benar Salah'];
   String selectedQuizType = 'Pilihan Ganda';
-  final dbHelper = DatabaseHelper();
 
   @override
   void initState() {
     super.initState();
-    _loadQuizTitles();
-    _loadData();
+    _fetchQuizzesBySubject();
   }
 
-  Future<void> _loadQuizTitles() async {
-    // Memuat judul kuis dari database sesuai dengan tipe dan subjek
-    quizNames = await dbHelper.getQuizByTypeAndSubject(selectedQuizType, widget.subject);
-    setState(() {});
+  // Fetch quizzes based on the selected subject
+  Future<void> _fetchQuizzesBySubject() async {
+    final dbHelper = DatabaseHelper();
+    final quizzes = await dbHelper.getAllQuizzes();
+    final subjectQuizzes = quizzes.where((quiz) => quiz.subject == widget.subject).toList();
+
+    setState(() {
+      quizList = subjectQuizzes.map((quiz) {
+        return {
+          'quiz_id': quiz.quizId,
+          'title': quiz.title,
+          'type': quiz.type,
+        };
+      }).toList();
+    });
   }
 
-  Future<void> _loadData() async {
-    // Memuat distribusi skor dan total mahasiswa sesuai tipe dan subjek
-    currentDistribusi = await dbHelper.getScoresByQuizTypeAndSubject(selectedQuizType, widget.subject);
-    totalStudents = await dbHelper.getTotalStudentsByTypeAndSubject(selectedQuizType, widget.subject);
-    setState(() {});
+  Future<void> _loadQuizScores(int quizId) async {
+    final dbHelper = DatabaseHelper();
+    final scores = await dbHelper.getScoresByQuizId(quizId);
+    final studentCount = await dbHelper.getTotalStudentsByQuizId(quizId);
+
+    setState(() {
+      currentDistribusi = _calculateScoreDistribution(scores);
+      totalStudents = studentCount;
+    });
+  }
+
+  List<int> _calculateScoreDistribution(List<int> scores) {
+    List<int> distribution = [0, 0, 0, 0];
+    for (int score in scores) {
+      if (score <= 25) {
+        distribution[0]++;
+      } else if (score <= 50) {
+        distribution[1]++;
+      } else if (score <= 75) {
+        distribution[2]++;
+      } else {
+        distribution[3]++;
+      }
+    }
+    return distribution;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF00B1C2),
+        backgroundColor: const Color(0xFF00B1C2),
         title: Text(
           'Statistik Nilai Kuis ${widget.subject}',
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: quizTypes.map((type) {
-                  return GestureDetector(
-                    onTap: () async {
-                      setState(() {
-                        selectedQuizType = type; // Set tipe kuis yang dipilih
-                      });
-                      await _loadQuizTitles(); // Memuat judul kuis yang sesuai dengan tipe
-                      await _loadData(); // Memuat data skor sesuai tipe dan subjek
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: selectedQuizType == type ? Color(0xFFFFD801) : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        type,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: selectedQuizType == type ? Colors.black : Colors.grey,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
+              // // Tambahkan kode di bawah ini jika ingin mengaktifkan filter quiz type
+              // child: Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+              //   children: quizTypes.map((type) {
+              //     return GestureDetector(
+              //       onTap: () {
+              //         setState(() {
+              //           selectedQuizType = type;
+              //           _fetchQuizzesBySubject();
+              //         });
+              //       },
+              //       child: Container(
+              //         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              //         decoration: BoxDecoration(
+              //           color: selectedQuizType == type
+              //               ? const Color(0xFFFFD801)
+              //               : Colors.grey.shade200,
+              //           borderRadius: BorderRadius.circular(20),
+              //         ),
+              //         child: Text(
+              //           type,
+              //           style: TextStyle(
+              //             fontSize: 16,
+              //             color: selectedQuizType == type ? Colors.black : Colors.grey,
+              //           ),
+              //         ),
+              //       ),
+              //     );
+              //   }).toList(),
+              // ),
             ),
             SizedBox(
               width: 400,
               height: 400,
               child: BarChart(
                 BarChartData(
-                  maxY: 100,
+                  maxY: 10,
                   barGroups: _generateBarGroups(currentDistribusi),
                   borderData: FlBorderData(show: false),
                   titlesData: FlTitlesData(
@@ -97,10 +129,18 @@ class _Statistik extends State<Statistik> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (double value, TitleMeta meta) {
-                          if (value.toInt() < currentDistribusi.length) {
-                            return Text(currentDistribusi[value.toInt()].toString());
+                          switch (value.toInt()) {
+                            case 0:
+                              return const Text('0-25');
+                            case 1:
+                              return const Text('26-50');
+                            case 2:
+                              return const Text('51-75');
+                            case 3:
+                              return const Text('76-100');
+                            default:
+                              return const Text('');
                           }
-                          return const Text('');
                         },
                       ),
                     ),
@@ -114,20 +154,21 @@ class _Statistik extends State<Statistik> {
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
             const SizedBox(height: 10),
-            ListView.builder(
+            quizList.isNotEmpty
+                ? ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: quizNames.length,
+              itemCount: quizList.length,
               itemBuilder: (context, index) {
                 return GestureDetector(
-                  onTap: () async {
-                    currentDistribusi;
-                    totalStudents;
+                  onTap: () {
+                    _loadQuizScores(quizList[index]['quiz_id']); // pastikan kunci diakses dengan benar
                   },
-                  child: _buildProductItem(quizNames[index]),
+                  child: _buildProductItem(quizList[index]['title']),
                 );
               },
-            ),
+            )
+                : const Center(child: Text("No quizzes available")),
           ],
         ),
       ),
@@ -142,7 +183,7 @@ class _Statistik extends State<Statistik> {
         barRods: [
           BarChartRodData(
             toY: distribusi[index].toDouble(),
-            color: Color(0xFFFFD801),
+            color: const Color(0xFFFFD801),
             width: 20,
           ),
         ],
@@ -155,7 +196,7 @@ class _Statistik extends State<Statistik> {
       padding: const EdgeInsets.all(8),
       child: Container(
         decoration: BoxDecoration(
-          color: Color(0xFF3B547A),
+          color: const Color(0xFF3B547A),
           borderRadius: BorderRadius.circular(15.0),
         ),
         padding: const EdgeInsets.all(16.0),

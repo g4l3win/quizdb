@@ -436,26 +436,25 @@ class DatabaseHelper {
     return List<String>.from(maps.map((map) => map['title']));
   }
 
-  Future<List<int>> getScoresByQuizTypeAndSubject(String type,
-      String subject) async {
+  // Mendapatkan list score berdasarkan quiz_id dari tabel Result
+  Future<List<int>> getScoresByQuizId(int quizId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT Result.score FROM Result
-      JOIN Quiz ON Quiz.quiz_id = Result.quiz_id
-      WHERE Quiz.type = ? AND Quiz.subject = ?
-    ''', [type, subject]);
+    SELECT Result.score FROM Result
+    WHERE Result.quiz_id = ?
+  ''', [quizId]);
 
-    return List<int>.from(maps.map((map) => map['score'] as int));
+    // Convert each score to an integer
+    return List<int>.from(maps.map((map) => (map['score'] as num).toInt()));
   }
 
-  Future<int> getTotalStudentsByTypeAndSubject(String type,
-      String subject) async {
+// Mendapatkan total jumlah siswa per quiz_id
+  Future<int> getTotalStudentsByQuizId(int quizId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.rawQuery('''
-      SELECT COUNT(DISTINCT user_id) as total_students FROM Result
-      JOIN Quiz ON Quiz.quiz_id = Result.quiz_id
-      WHERE Quiz.subject = ? AND Quiz.type = ?
-    ''', [type, subject]);
+    SELECT COUNT(DISTINCT user_id) as total_students FROM Result
+    WHERE quiz_id = ? 
+  ''', [quizId]);
 
     return maps.first['total_students'] as int;
   }
