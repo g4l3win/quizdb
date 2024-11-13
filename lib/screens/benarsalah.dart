@@ -180,11 +180,11 @@ class _TrueFalseQuizState extends State<TrueFalseQuiz> {
         SizedBox(height: 20),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: buildAnswerButton("True"),
+          child: buildAnswerButton("Benar"),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: buildAnswerButton("False"),
+          child: buildAnswerButton("Salah"),
         ),
       ],
     );
