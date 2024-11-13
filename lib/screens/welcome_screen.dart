@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'package:quizdb/screens/home_screen.dart';
+
+
 
 class WelcomeScreen extends StatelessWidget {
   @override

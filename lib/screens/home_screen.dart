@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+
 import 'quiz_screen.dart';
 import 'create_quiz_screen.dart'; // Import halaman baru
 import 'Account.dart';
 import 'materistat.dart';
+import 'package:quizdb/screens/mahasiswa.dart'; // Sesuaikan dengan lokasi file Mahasiswa
+
 
 class HomePage extends StatefulWidget {
   @override
@@ -146,14 +149,15 @@ class _HomePageState extends State<HomePage> {
                               ),
                             );
                           } else if (catNames[index] ==
-                              "Papan Peringkat") {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) =>
-                            //         LeaderboardScreen(), // Isi dengan subjek sesuai kebutuhan
-                            //   ),
-                            // );
+                              "Daftar Mahasiswa") {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    Mahasiswa(), // Isi dengan subjek sesuai kebutuhan
+                              ),
+                            );
+                            print("Navigating to Mahasiswa...");
                           }
                         },
                         child: Column(

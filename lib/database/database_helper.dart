@@ -6,6 +6,7 @@ import '../models/quiz_model.dart';
 import '../models/question_model.dart';
 import '../models/result_model.dart';
 
+
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
 
@@ -186,6 +187,13 @@ class DatabaseHelper {
       (6,'widget adalah elemen untuk membangun UI.','Benar'),
       (6,'Flutter adalah framework untuk aplikasi Android.','Salah')
     ''');
+
+
+      await db.execute(
+          'CREATE TABLE user('
+              'userid INTEGER PRIMARY KEY AUTOINCREMENT, '
+              'username TEXT NOT NULL, '
+              'password TEXT NOT NULL);');
   }
 
   // CRUD for Quiz table
@@ -390,17 +398,7 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
-//harapannya buat leaderboard
-  Future<List<Map<String, dynamic>>> getLeaderboard(int quizId) async {
-    final db = await database;
-    return await db.query(
-      'Result',
-      where: 'quiz_id = ?',
-      whereArgs: [quizId],
-      orderBy: 'score DESC',
-      limit: 10,
-    );
-  }
+
 
   Future<Map<String, dynamic>> getQuizWithQuestions(int quizId) async {
     final db = await database;
@@ -431,6 +429,7 @@ class DatabaseHelper {
     final db = await database;
     return await db.query('Mahasiswa');
   }
+
 
   Future<List<String>> getQuizByTypeAndSubject(String type,
       String subject) async {

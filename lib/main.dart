@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screens/welcome_screen.dart';
+import 'package:quizdb/screens/SignIn.dart';
+
 
 void main() => runApp(MyApp());
 
@@ -9,7 +10,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Kuis Interaktif',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: WelcomeScreen(),
+      home: Signin(),
       debugShowCheckedModeBanner: false, // Disable the debug banner
     );
   }

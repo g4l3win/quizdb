@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'SignIn.dart'; // Pastikan path ke file SignIn.dart sudah benar
 
 class Account extends StatelessWidget {
   @override
@@ -32,6 +33,7 @@ class Account extends StatelessWidget {
                 ],
               ),
             ),
+            // Tombol Masuk / Daftar
             Center(
               child: ElevatedButton(
                 onPressed: () {
@@ -48,6 +50,32 @@ class Account extends StatelessWidget {
                 ),
               ),
             ),
+            SizedBox(height: 30), // Spasi antara tombol Masuk dan Log Out
+            // Tombol Log Out di tengah
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => Signin()));
+                },
+                child: Text(
+                  "Log Out",
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1,
+                    wordSpacing: 2,
+                    color: Color(0xFF3B547A),
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  backgroundColor: Colors.white,
+                  side: BorderSide(color: Color(0xFF3B547A), width: 2), // Warna border tombol
+                ),
+              ),
+            ),
+            SizedBox(height: 20), // Memberikan sedikit spasi di bawah tombol
           ],
         ),
       ),
@@ -63,8 +91,7 @@ class Account extends StatelessWidget {
         borderRadius: BorderRadius.circular(10), // Sudut border
       ),
       child: ListTile(
-        leading:
-        Icon(icon, color: Colors.yellow), // Ubah warna ikon menjadi kuning
+        leading: Icon(icon, color: Colors.yellow), // Ubah warna ikon menjadi kuning
         title: Text(
           title,
           style: TextStyle(color: textColor),
