@@ -77,24 +77,24 @@ class _QuizHomePageState extends State<QuizHomePage> {
                               builder: (context) => Pilihanganda(quizId: quiz['quiz_id'])
                             ),
                           );
-                        } else if (quiz['type'] == 'Benar Salah') {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => BenarSalahPage(
-                          //       quizId: quiz['quiz_id'],
-                          //     ),
-                          //   ),
-                          // );
+                        } else if (quiz['type'] == 'Benar/Salah') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TrueFalseQuiz(
+                                quizId: quiz['quiz_id'],
+                              ),
+                            ),
+                          );
                         } else if (quiz['type'] == 'Esai') {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => EsaiPage(
-                          //       quizId: quiz['quiz_id'],
-                          //     ),
-                          //   ),
-                          // );
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EssayQuiz(
+                                quizId: quiz['quiz_id'],
+                              ),
+                            ),
+                          );
                         }
                       },
                       style: ElevatedButton.styleFrom(

@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/questionEsai_model.dart';
+import 'package:quizdb/models/questionBenarSalah_model.dart';
 import '../models/quiz_model.dart';
 import '../models/question_model.dart';
 import '../models/result_model.dart';
@@ -276,14 +277,16 @@ class DatabaseHelper {
     return await db.insert('QuestionBenarSalah', question);
   }
 
-  Future<List<Map<String, dynamic>>> getQuestionsBenarSalahByQuizId(
-      int quizId) async {
+  Future<List<QuestionBenarSalah>> getQuestionsBenarSalahByQuizId(int quizId) async {
     final db = await database;
-    return await db.query(
+    final List<Map<String, dynamic>> maps = await db.query(
       'QuestionBenarSalah',
       where: 'quiz_id = ?',
       whereArgs: [quizId],
     );
+
+    // Konversi hasil query menjadi List<QuestionBenarSalah>
+    return List.generate(maps.length, (i) => QuestionBenarSalah.fromMap(maps[i]));
   }
 
   Future<int> updateQuestionBenarSalah(Map<String, dynamic> question,
@@ -320,15 +323,18 @@ class DatabaseHelper {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getQuestionsEsaiByQuizId(
-      int quizId) async {
+  Future<List<QuestionEsai>> getQuestionsEsaiByQuizId(int quizId) async {
     final db = await database;
-    return await db.query(
+    final List<Map<String, dynamic>> maps = await db.query(
       'QuestionEsai',
       where: 'quiz_id = ?',
       whereArgs: [quizId],
     );
+
+    // Ubah ke List<QuestionEsai>
+    return List.generate(maps.length, (i) => QuestionEsai.fromMap(maps[i]));
   }
+
 
   Future<int> updateQuestionEsai(Map<String, dynamic> questionEsai,
       int questionId) async {
@@ -384,7 +390,7 @@ class DatabaseHelper {
       whereArgs: [id],
     );
   }
-
+//harapannya buat leaderboard
   Future<List<Map<String, dynamic>>> getLeaderboard(int quizId) async {
     final db = await database;
     return await db.query(
