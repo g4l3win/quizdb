@@ -16,7 +16,7 @@ class _HomePageState extends State<HomePage> {
   List<String> catNames = [
     "Buat Kuis",
     "Statistik",
-    "Papan Peringkat",
+    "Daftar Mahasiswa",
   ];
 
   List<Color> catColors = [
